@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Debt Accounting</string>
+    <string name="debt_sum">Всего: </string>
+</resources>
