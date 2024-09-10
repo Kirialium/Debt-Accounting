@@ -19,24 +19,55 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class HomeViewModel(private val personRepository: PersonRepository): ViewModel() {
-    private val TAG: String = "TAG"
+    //Home State
     private val _homeState = MutableStateFlow(HomeState())
+    val homeState: StateFlow<HomeState> = _homeState.asStateFlow()
+
+    //Moshi converter for room lists
     private val moshi = Moshi.Builder().add(com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory()).build()
     private val type = Types.newParameterizedType(List::class.java, Int::class.javaObjectType)
     private val adapter = moshi.adapter<List<Int>>(type)
-    val homeState: StateFlow<HomeState> = _homeState.asStateFlow()
 
     init{
+        initTopTabsValues()
         getAll()
+    }
+
+    fun changeOpenTab(openTabIndex: Int){
+        _homeState.value = _homeState.value.copy(
+            selectedTab = openTabIndex
+        )
+        //TODO полностью доделать вкладки
+        val newTabsState: List<TopTabsState> = _homeState.value.tabsStates.mapIndexed { index, tab ->
+            if (openTabIndex == index) {
+                tab.copy(isSelected = true)
+            } else {
+                tab.copy(isSelected = false)
+            }
+        }
+        _homeState.value = _homeState.value.copy(
+            tabsStates = newTabsState
+        )
+    }
+
+    private fun initTopTabsValues(){
+        val tabsList: List<TopTabsState> = listOf(
+            TopTabsState(tabName = "Мои", isSelected = true, index = 0),
+            TopTabsState(tabName = "Мне", isSelected = false, index = 1)
+        )
+        _homeState.value = _homeState.value.copy(
+            tabsStates = tabsList,
+            selectedTab = 0
+        )
     }
 
     fun toggleCardExpansion(index: Int) {
         _homeState.value = _homeState.value.copy(
             cardStates = _homeState.value.cardStates.mapIndexed { i, cardState ->
                 if (i == index) {
-                    cardState.copy(isExpanded = !cardState.isExpanded) // Переключаем состояние для конкретной карточки
+                    cardState.copy(isExpanded = !cardState.isExpanded)
                 } else {
-                    cardState // Оставляем состояние для всех других карточек без изменений
+                    cardState
                 }
             }
         )
@@ -48,7 +79,7 @@ class HomeViewModel(private val personRepository: PersonRepository): ViewModel()
                 val cardStates = personDataList.map { personData ->
                     CardState(personData = personData, isExpanded = false)
                 }
-                _homeState.value = HomeState(personData = personDataList, cardStates = cardStates)
+                _homeState.value = _homeState.value.copy(personData = personDataList, cardStates = cardStates)
             }
         }
     }
