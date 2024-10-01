@@ -3,6 +3,7 @@ package com.example.debtaccounting.ui.theme
 import androidx.compose.ui.graphics.Color
 
 val tempContainer = Color(0xFFECEEF4)
+val darkWhite = Color(0xFFD2DADF)
 
 //Light color scheme
 val primaryLight = Color(0xFF33618D)
